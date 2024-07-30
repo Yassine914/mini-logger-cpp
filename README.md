@@ -4,12 +4,12 @@ A mini header-only logger class.
 ## Usage
 
 to log a message you first specify the type from these:
-    - LOG_FATAL
-    - LOG_ERROR
-    - LOG_WARN
-    - LOG_DEBUG
-    - LOG_TRACE
-    - LOG_INFO
+- LOG_FATAL
+- LOG_ERROR
+- LOG_WARN
+- LOG_DEBUG
+- LOG_TRACE
+- LOG_INFO
 
 then you specify the message after the << operator:
 
@@ -49,7 +49,7 @@ Log(LOG_WARN, FILE_INFO) << "this should show\n";
 
 you can use the EnableFileOutput() function.
 it can take an optional filepath
-    - if not specified, the output will be directed to "logger.txt"
+- if not specified, the output will be directed to "logger.txt"
 
 ## Extra Parameters - File:Line info
 
@@ -74,13 +74,13 @@ LOG(LOG_ERROR, "hello" << "\n");
 ## Colors
 
 specified colors:
-    - TEXT_RED
-    - TEXT_GREEN 
-    - TEXT_YELLOW
-    - TEXT_BLUE  
-    - TEXT_PURPLE
-    - TEXT_CYAN  
-    - TEXT_WHITE
+- TEXT_RED
+- TEXT_GREEN 
+- TEXT_YELLOW
+- TEXT_BLUE  
+- TEXT_PURPLE
+- TEXT_CYAN  
+- TEXT_WHITE
 
 note that colors are not output to the file.
 - To disable colors, comment this line in the logger.h file:
