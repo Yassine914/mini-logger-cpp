@@ -3,6 +3,16 @@ A mini header-only logger class.
 
 ## Usage
 
+to start the logger call one of the following macros:
+NOTE: initialization done inside the main function
+initialize once per scope.
+```cpp
+LOGINIT_COUT(); // initialize output stream as std::cout
+LOGINIT_CERR(); // initialize output stream as std::cerr
+LOGINIT_CLOG(); // initialize output stream as std::clog
+LOGINIT_CUSTOM(x); // initialize output stream as any ostream you want
+```
+
 to log a message you first specify the type from these:
 - LOG_FATAL
 - LOG_ERROR
@@ -15,6 +25,7 @@ then you specify the message after the << operator:
 
 example:
 ```cpp
+LOGINIT_COUT();
 Log(LOG_INFO) << "message\n";
 ```
 
@@ -87,21 +98,3 @@ note that colors are not output to the file.
 ```cpp
 24 #define TEXT_COLORS
 ```
-
-## Extras: Timer Class
-
-a simple timer class that outputs the duration of a block of code.
-it starts when it is initialized like:
-```cpp
-Timer myTimer("timethisfunction", true);
-```
-the constructor takes a name and if it should be in ms (true) or sec (false)
-
-the timer will output the duration after it exits the scope or explicitly deleted.
-output example:
-```cpp
-timethisfunction: 24.234s
-```
-
-you could also get the duration explicitly using the GetCurrentDuration(bool ms) function
-the argument also specifies whether to output it in ms (true) or sec (false)

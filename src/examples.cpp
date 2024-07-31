@@ -5,6 +5,7 @@
 
 int main()
 {
+    LOGINIT_COUT();
     // NOTE: mutex lock doesn't work all that well with output streams...
     // therefore this logger is thread UNSAFE (for now)
 
@@ -37,21 +38,4 @@ int main()
 
     LOG(LOG_INFO, "logger macro " << "for less verbosity and auto file info\n");
     LOG(LOG_INFO, "think of it as a macro, within a macro.. within a macro.\n");
-
-    
-    // --------------- timer test -----------------
-    {   // test: scoped
-        Timer timer("100couts", true);
-
-        for(int i = 0; i < 100; i++)
-            std::cout<< "hello\n";
-    }
-
-    // test: explicit deletion
-    Timer *timer = new Timer("100couts", false);
-
-    for(int i = 0; i < 100; i++)
-        std::cout << "hello" << std::endl;
-
-    delete timer;
 }

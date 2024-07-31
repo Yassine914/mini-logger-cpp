@@ -28,6 +28,9 @@ typedef float f32;
 using std::chrono::system_clock;
 
 #define LOCK_MUTEX(x) std::lock_guard<std::mutex> lock(x)
+#define INITLOG()\
+    Logger *Logger::instance = nullptr; \
+    Logger &Log = *Logger::GetInstance(); \
 
 // macros for initializing logger with
 // a different outstream.
@@ -108,18 +111,29 @@ class Logger
     std::ostream &outStream;
 
     public:
-    // for thread safety (FIXME)
-    static std::mutex mut;
+    static Logger *instance;
+    std::mutex mut;
 
     // clang-format off
-    public:
     Logger(std::ostream &os)
         :outStream{os}, 
          logLevel{LogLevel::INFO},
          outType{OutputType::CONSOLE}
     {
+
     }
-    
+
+    public:
+    Logger(const Logger &log) = delete;
+
+    static Logger *GetInstance()
+    {
+        if(instance == nullptr)
+            instance = new Logger(std::cout);
+
+        return instance; 
+    }
+
     // setters
     void EnableFileOutput()
     {
@@ -337,58 +351,4 @@ class Logger
 
     std::string ResetColor() { return TEXT_WHITE; }
     // clang-format on
-};
-
-// NOTE: lsp giving me warning to not init those in a header file... might look into that.
-std::mutex Logger::mut;
-
-// NOTE: replace this macro with what out stream you want
-LOGINIT_COUT();
-
-// TODO: fix mutex lock
-
-
-// --------------------- TIMER CLASS --------------------
-// to time a scope/function and output time in ms or secs
-// temporary timer
-//
-// initialize at the start of the part you want to type
-// delete the instance or exit the scope to get the duration
-// output by which out stream you specify in LOGINIT() above.
-
-struct Timer
-{
-    std::string name;
-    bool ms;
-    std::chrono::time_point<std::chrono::steady_clock> start, end;
-    std::chrono::duration<f64> duration;
-
-    // constructor to start the clock...
-    Timer(std::string name, bool ms) : ms{ms}, name{name} { start = std::chrono::high_resolution_clock::now(); }
-
-    // get the current duration since initialization.
-    f64 GetCurrentDuration(bool ms)
-    {
-        auto time = std::chrono::high_resolution_clock::now();
-        auto currentDuration = time - start;
-
-        if(ms)
-            return currentDuration.count() * 1000.0;
-        else
-            return currentDuration.count();
-    }
-
-    // destructor that outputs duration as soon as the scope is exited.
-    ~Timer()
-    {
-        end = std::chrono::high_resolution_clock::now();
-        duration = end - start;
-
-        f64 timeInMS = duration.count() * 1000.0;
-
-        if(ms)
-            Log(LOG_INFO) << name << ": " << timeInMS << "ms \n";
-        else
-            Log(LOG_INFO) << name << ": " << duration.count() << "s \n";
-    }
 };
