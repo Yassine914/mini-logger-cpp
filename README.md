@@ -4,7 +4,7 @@ A mini header-only logger class.
 ## Usage
 
 to start the logger call one of the following macros:
-NOTE: initialization done inside the main function
+NOTE: don't define it globally since it tends to create linking errors.
 initialize once per scope.
 ```cpp
 LOGINIT_COUT(); // initialize output stream as std::cout
