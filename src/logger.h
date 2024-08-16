@@ -57,8 +57,7 @@ using std::chrono::system_clock;
 
 // default file for file output if one isn't specified
 #define LOG_DEFAULT_FILE "logger.txt"
-
-#define FILE_INFO __FILE__, __LINE__
+#define FILE_INFO        __FILE__, __LINE__
 
 // macro for logging with file info.
 #define LOG(x, y) Log(x, FILE_INFO) << y
@@ -76,19 +75,21 @@ enum class LogLevel
 
 enum class OutputType
 {
-    CONSOLE = 0,
-    FILE = 1,
-    FILEONLY = 2
+    NONE = 0,
+    CONSOLE = 1,
+    FILE = 2,
+    FILEONLY = 3
 };
 
 // --------------------- LOGGER CLASS --------------------
-
 class Logger
 {
-    private:
+    public:
     static LogLevel logLevel;
     static OutputType outType;
-    static LogLevel currentLevel;
+
+    private:
+    LogLevel currentLevel;
 
     std::ofstream fileStream;
     std::string filePath;
@@ -101,7 +102,8 @@ class Logger
 
     // clang-format off
     Logger(std::ostream &os)
-        :outStream{os}
+        :currentLevel{logLevel},
+        outStream{os}
     {
     }
 
@@ -124,7 +126,7 @@ class Logger
         else
             filePath = filepath;
 
-        outType = OutputType::FILE;
+        Logger::outType = OutputType::FILE;
 
         if(fileStream.is_open())
             fileStream.close();
@@ -139,7 +141,7 @@ class Logger
         else
             filePath = filepath;
 
-        outType = OutputType::FILEONLY;
+        Logger::outType = OutputType::FILEONLY;
 
         if(fileStream.is_open())
             fileStream.close();
@@ -149,7 +151,7 @@ class Logger
 
     void DisableFileOutput()
     {
-        outType = OutputType::CONSOLE;
+        Logger::outType = OutputType::CONSOLE;
 
         if(fileStream.is_open())
             fileStream.close();
@@ -158,7 +160,7 @@ class Logger
     template<typename T>
     static void SetLogLevel(T ll)
     {
-        logLevel = (LogLevel) ll;
+        Logger::logLevel = (LogLevel) ll;
     }
 
     // operator() takes log level and (optional) file data
@@ -167,16 +169,16 @@ class Logger
     {
         currentLevel = (LogLevel) ll;
         LOCK_MUTEX(mut);
-        if((LogLevel)ll > logLevel)
+        if((LogLevel)ll > Logger::logLevel)
             return *this;
         
-        if(outType != OutputType::FILEONLY)
+        if(Logger::outType != OutputType::FILEONLY)
         {
             outStream << "[";
             outStream << OutputColoredHeader((LogLevel) ll);
 
-            outStream << CurrentTime();
             outStream << " ";
+            outStream << CurrentTime();
             
             outStream << ResetColor();
             outStream << "]\t";
@@ -187,8 +189,8 @@ class Logger
             fileStream << "[";
             fileStream << OutputHeader((LogLevel) ll);
             
-            outStream << CurrentTime();
             outStream << " ";
+            outStream << CurrentTime();
             
             fileStream << "]\t";
         }
@@ -202,10 +204,10 @@ class Logger
         currentLevel = (LogLevel) ll;
 
         LOCK_MUTEX(mut);
-        if((LogLevel) ll > logLevel)
+        if((LogLevel) ll > Logger::logLevel)
             return *this;
 
-        if(outType != OutputType::FILEONLY)
+        if(Logger::outType != OutputType::FILEONLY)
         {
             // [LEVEL TIME FILE]\t
             outStream << "[";
@@ -242,7 +244,7 @@ class Logger
     Logger &operator<<(const T &txt)
     {
         LOCK_MUTEX(mut);
-        if(currentLevel > logLevel)
+        if(currentLevel > Logger::logLevel)
             return *this;
         
         outStream << txt;
@@ -336,7 +338,7 @@ class Logger
         auto in_time_t = std::chrono::system_clock::to_time_t(now);
 
         std::stringstream ss;
-        ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X");
+        ss << std::put_time(std::localtime(&in_time_t), "%X");
         return ss.str();
     }
 
@@ -353,56 +355,67 @@ class Logger
     // clang-format on
 };
 
-// static types
-LogLevel Logger::logLevel = LogLevel::INFO;
-OutputType Logger::outType = OutputType::CONSOLE;
-LogLevel Logger::currentLevel = LogLevel::INFO;
-
 // macros for initialzing and running the logger with minimal code.
 #define LFATAL(x)                                                                                                      \
     {                                                                                                                  \
         LOGINIT_COUT();                                                                                                \
-        Log(LOG_FATAL, FILE_INFO) << % % x;                                                                            \
+        Log(LOG_FATAL, FILE_INFO) << x;                                                                                \
     }
 
 #define LERROR(x)                                                                                                      \
     {                                                                                                                  \
         LOGINIT_COUT();                                                                                                \
-        Log(LOG_ERROR, FILE_INFO) << % % x;                                                                            \
+        Log(LOG_ERROR, FILE_INFO) << x;                                                                                \
     }
 
 #define LWARN(x, y)                                                                                                    \
     {                                                                                                                  \
         LOGINIT_COUT();                                                                                                \
-        if(x == true)                                                                                                  \
-            Log(LOG_WARN, FILE_INFO) << % % x;                                                                         \
+        if(x)                                                                                                          \
+        {                                                                                                              \
+            Log(LOG_WARN, FILE_INFO) << y;                                                                             \
+        }                                                                                                              \
         else                                                                                                           \
-            Log(LOG_WARN) << % % x;                                                                                    \
+        {                                                                                                              \
+            Log(LOG_WARN) << y;                                                                                        \
+        }                                                                                                              \
     }
 
 #define LDEBUG(x, y)                                                                                                   \
     {                                                                                                                  \
         LOGINIT_COUT();                                                                                                \
-        if(x == true)                                                                                                  \
-            Log(LOG_DEBUG, FILE_INFO) << % % x;                                                                        \
+        if(x)                                                                                                          \
+        {                                                                                                              \
+            Log(LOG_DEBUG, FILE_INFO) << y;                                                                            \
+        }                                                                                                              \
         else                                                                                                           \
-            Log(LOG_DEBUG) << % % x;                                                                                   \
+        {                                                                                                              \
+            Log(LOG_DEBUG) << y;                                                                                       \
+        }                                                                                                              \
     }
 
 #define LTRACE(x, y)                                                                                                   \
     {                                                                                                                  \
         LOGINIT_COUT();                                                                                                \
-        if(x == true)                                                                                                  \
-            Log(LOG_TRACE, FILE_INFO) << % % x;                                                                        \
+        if(x)                                                                                                          \
+        {                                                                                                              \
+            Log(LOG_TRACE, FILE_INFO) << y;                                                                            \
+        }                                                                                                              \
         else                                                                                                           \
-            Log(LOG_TRACE) << % % x;                                                                                   \
+        {                                                                                                              \
+            Log(LOG_TRACE) << y;                                                                                       \
+        }                                                                                                              \
     }
 
 #define LINFO(x, y)                                                                                                    \
     {                                                                                                                  \
         LOGINIT_COUT();                                                                                                \
-        if(x == true)                                                                                                  \
-            Log(LOG_INFO, FILE_INFO) << % % x;                                                                         \
+        if(x)                                                                                                          \
+        {                                                                                                              \
+            Log(LOG_INFO, FILE_INFO) << y;                                                                             \
+        }                                                                                                              \
         else                                                                                                           \
-            Log(LOG_INFO) << % % x;                                                                                    \
+        {                                                                                                              \
+            Log(LOG_INFO) << y;                                                                                        \
+        }                                                                                                              \
     }
