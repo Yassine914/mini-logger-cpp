@@ -2,22 +2,6 @@
 // -------------- MINI-LOGGER-CPP ------------
 // made by yassin shehab (Y)
 
-
-// aliases for types
-typedef unsigned long long u64;
-typedef unsigned int u32;
-typedef unsigned short u16;
-typedef unsigned char u8;
-
-typedef long long i64;
-typedef int i32;
-typedef short i16;
-typedef char i8;
-
-typedef double f64;
-typedef float f32;
-
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -28,9 +12,9 @@ typedef float f32;
 using std::chrono::system_clock;
 
 #define LOCK_MUTEX(x) std::lock_guard<std::mutex> lock(x)
-#define INITLOG()\
-    Logger *Logger::instance = nullptr; \
-    Logger &Log = *Logger::GetInstance(); \
+#define INITLOG()                                                                                                      \
+    Logger *Logger::instance = nullptr;                                                                                \
+    Logger &Log = *Logger::GetInstance();
 
 // macros for initializing logger with
 // a different outstream.
@@ -93,7 +77,8 @@ enum class LogLevel
 enum class OutputType
 {
     CONSOLE = 0,
-    FILE = 1
+    FILE = 1,
+    FILEONLY = 2
 };
 
 // --------------------- LOGGER CLASS --------------------
@@ -101,9 +86,9 @@ enum class OutputType
 class Logger
 {
     private:
-    LogLevel logLevel;
-    OutputType outType;
-    LogLevel currentLevel;
+    static LogLevel logLevel;
+    static OutputType outType;
+    static LogLevel currentLevel;
 
     std::ofstream fileStream;
     std::string filePath;
@@ -116,11 +101,8 @@ class Logger
 
     // clang-format off
     Logger(std::ostream &os)
-        :outStream{os}, 
-         logLevel{LogLevel::INFO},
-         outType{OutputType::CONSOLE}
+        :outStream{os}
     {
-
     }
 
     public:
@@ -135,10 +117,14 @@ class Logger
     }
 
     // setters
-    void EnableFileOutput()
+    void EnableFileOutput(std::string filepath = nullptr)
     {
+        if(filepath.size() == 0)
+            filePath = LOG_DEFAULT_FILE;
+        else
+            filePath = filepath;
+
         outType = OutputType::FILE;
-        filePath = LOG_DEFAULT_FILE;
 
         if(fileStream.is_open())
             fileStream.close();
@@ -146,10 +132,14 @@ class Logger
         fileStream.open(filePath, std::ios::out);
     }
 
-    void EnableFileOutput(std::string filepath)
+    void EnableOnlyFileOutput(std::string filepath = nullptr)
     {
-        outType = OutputType::FILE;
-        filePath = filepath;
+        if(filepath.size() == 0)
+            filePath = LOG_DEFAULT_FILE;
+        else
+            filePath = filepath;
+
+        outType = OutputType::FILEONLY;
 
         if(fileStream.is_open())
             fileStream.close();
@@ -166,7 +156,7 @@ class Logger
     }
 
     template<typename T>
-    void SetLogLevel(T ll)
+    static void SetLogLevel(T ll)
     {
         logLevel = (LogLevel) ll;
     }
@@ -179,22 +169,27 @@ class Logger
         LOCK_MUTEX(mut);
         if((LogLevel)ll > logLevel)
             return *this;
+        
+        if(outType != OutputType::FILEONLY)
+        {
+            outStream << "[";
+            outStream << OutputColoredHeader((LogLevel) ll);
 
-        outStream << "[";
-        outStream << OutputColoredHeader((LogLevel) ll);
-
-        // TODO: output current time.
-        // outStream << " ";
-        // OutputTimeStamp();
-
-        outStream << ResetColor();
-        outStream << "]\t";
+            outStream << CurrentTime();
+            outStream << " ";
+            
+            outStream << ResetColor();
+            outStream << "]\t";
+        }
 
         if(fileStream.is_open())
         {
             fileStream << "[";
             fileStream << OutputHeader((LogLevel) ll);
-            // TODO: handle timestamps
+            
+            outStream << CurrentTime();
+            outStream << " ";
+            
             fileStream << "]\t";
         }
         
@@ -210,25 +205,30 @@ class Logger
         if((LogLevel) ll > logLevel)
             return *this;
 
-        // [LEVEL TIME FILE]\t
-        outStream << "[";
-        outStream << OutputColoredHeader((LogLevel) ll);
-        outStream << " ";
-        
-        //TODO: get current time.
-        // OutputTimeStamp();
-        // outStream << " ";
-        outStream << OutputFileInfo(fileName, lineNumber);
+        if(outType != OutputType::FILEONLY)
+        {
+            // [LEVEL TIME FILE]\t
+            outStream << "[";
+            outStream << OutputColoredHeader((LogLevel) ll);
+            outStream << " ";
+            
+            outStream << CurrentTime();
+            outStream << " ";
 
-        outStream << ResetColor();
-        outStream << "]\t";
-        
+            outStream << OutputFileInfo(fileName, lineNumber);
+
+            outStream << ResetColor();
+            outStream << "]\t";
+        }
+       
         if(fileStream.is_open())
         {
             fileStream << "[" << OutputHeader((LogLevel) ll);
             
             fileStream << " ";
-            // TODO: handle timestamps
+
+            outStream << CurrentTime();
+            outStream << " ";
 
             fileStream << OutputFileInfo(fileName, lineNumber);
             fileStream << "]\t";
@@ -332,13 +332,13 @@ class Logger
 
     std::string CurrentTime()
     {
-        auto time = std::chrono::system_clock::now();
+        auto now = std::chrono::system_clock::now();
+        auto in_time_t = std::chrono::system_clock::to_time_t(now);
+
         std::stringstream ss;
-        ss << time.time_since_epoch().count();
+        ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X");
         return ss.str();
     }
-
-    void OutputTimeStamp() { outStream << CurrentTime(); }
 
     template<typename F, typename L>
     std::string OutputFileInfo(F file, L line)
@@ -352,3 +352,57 @@ class Logger
     std::string ResetColor() { return TEXT_WHITE; }
     // clang-format on
 };
+
+// static types
+LogLevel Logger::logLevel = LogLevel::INFO;
+OutputType Logger::outType = OutputType::CONSOLE;
+LogLevel Logger::currentLevel = LogLevel::INFO;
+
+// macros for initialzing and running the logger with minimal code.
+#define LFATAL(x)                                                                                                      \
+    {                                                                                                                  \
+        LOGINIT_COUT();                                                                                                \
+        Log(LOG_FATAL, FILE_INFO) << % % x;                                                                            \
+    }
+
+#define LERROR(x)                                                                                                      \
+    {                                                                                                                  \
+        LOGINIT_COUT();                                                                                                \
+        Log(LOG_ERROR, FILE_INFO) << % % x;                                                                            \
+    }
+
+#define LWARN(x, y)                                                                                                    \
+    {                                                                                                                  \
+        LOGINIT_COUT();                                                                                                \
+        if(x == true)                                                                                                  \
+            Log(LOG_WARN, FILE_INFO) << % % x;                                                                         \
+        else                                                                                                           \
+            Log(LOG_WARN) << % % x;                                                                                    \
+    }
+
+#define LDEBUG(x, y)                                                                                                   \
+    {                                                                                                                  \
+        LOGINIT_COUT();                                                                                                \
+        if(x == true)                                                                                                  \
+            Log(LOG_DEBUG, FILE_INFO) << % % x;                                                                        \
+        else                                                                                                           \
+            Log(LOG_DEBUG) << % % x;                                                                                   \
+    }
+
+#define LTRACE(x, y)                                                                                                   \
+    {                                                                                                                  \
+        LOGINIT_COUT();                                                                                                \
+        if(x == true)                                                                                                  \
+            Log(LOG_TRACE, FILE_INFO) << % % x;                                                                        \
+        else                                                                                                           \
+            Log(LOG_TRACE) << % % x;                                                                                   \
+    }
+
+#define LINFO(x, y)                                                                                                    \
+    {                                                                                                                  \
+        LOGINIT_COUT();                                                                                                \
+        if(x == true)                                                                                                  \
+            Log(LOG_INFO, FILE_INFO) << % % x;                                                                         \
+        else                                                                                                           \
+            Log(LOG_INFO) << % % x;                                                                                    \
+    }
