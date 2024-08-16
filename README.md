@@ -1,7 +1,33 @@
 # mini-logger.cpp
-A mini header-only logger class.
+A mini (mostly) header-only logger class.
+NOTE: the cpp file is only for static variables.
 
 ## Usage
+
+
+### Easier way to log:
+just use the L{LOGTYPE} macro.
+NOTE: no need to initialize the logger using these.
+example:
+```cpp
+// LFATAL(stream message);
+LFATAL("hello" << " world" << "\n");
+
+// LERROR(stream message);
+LERROR("error\n");
+
+// LWARN(bool fileInfo, stream message);
+// LDEBUG(bool fileInfo, stream message);
+// LTRACE(bool fileInfo, stream message);
+// LINFO(bool fileInfo, stream message);
+
+LWARN(true, "hello" << " world\n");
+// [WARN TIME FILEINFO] hello world
+
+LINFO(false, "sup" << "\n");
+// [INFO TIME] sup
+```
+
 
 to start the logger call one of the following macros:
 NOTE: don't define it globally since it tends to create linking errors.
