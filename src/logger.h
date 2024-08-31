@@ -12,9 +12,6 @@
 using std::chrono::system_clock;
 
 #define LOCK_MUTEX(x) std::lock_guard<std::mutex> lock(x)
-#define INITLOG()                                                                                                      \
-    Logger *Logger::instance = nullptr;                                                                                \
-    Logger &Log = *Logger::GetInstance();
 
 // macros for initializing logger with
 // a different outstream.
@@ -418,4 +415,13 @@ class Logger
         {                                                                                                              \
             Log(LOG_INFO) << y;                                                                                        \
         }                                                                                                              \
+    }
+
+#define LOG_SET_PRIORITY(x) Logger::SetLogLevel(x);
+
+#define LASSERT(x, y)                                                                                                  \
+    if(!(x))                                                                                                           \
+    {                                                                                                                  \
+        LERROR(y);                                                                                                     \
+        exit(1);                                                                                                       \
     }
