@@ -1,14 +1,16 @@
 # mini-logger.cpp
+
 A mini (mostly) header-only logger class.
 NOTE: the cpp file is only for static variables.
 
 ## Usage
 
-
 ### Easier way to log:
+
 just use the L{LOGTYPE} macro.
 NOTE: no need to initialize the logger using these.
 example:
+
 ```cpp
 // LFATAL(stream message);
 LFATAL("hello" << " world" << "\n");
@@ -32,6 +34,7 @@ LINFO(false, "sup" << "\n");
 to start the logger call one of the following macros:
 NOTE: don't define it globally since it tends to create linking errors.
 initialize once per scope.
+
 ```cpp
 LOGINIT_COUT(); // initialize output stream as std::cout
 LOGINIT_CERR(); // initialize output stream as std::cerr
@@ -40,6 +43,7 @@ LOGINIT_CUSTOM(x); // initialize output stream as any ostream you want
 ```
 
 to log a message you first specify the type from these:
+
 - LOG_FATAL
 - LOG_ERROR
 - LOG_WARN
