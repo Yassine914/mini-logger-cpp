@@ -1,3 +1,0 @@
-[ERROR]	hello world
-[WARN]	warning man
-[FATAL .\src\examples.cpp:26]	fatal error bruh...

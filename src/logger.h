@@ -297,11 +297,6 @@ class Logger
 
     std::string OutputHeader(LogLevel ll) 
     {
-        std::string output;
-
-        if(!fileStream.is_open())
-            return "";
-        
         switch(ll)
         {
         case LogLevel::NONE:
