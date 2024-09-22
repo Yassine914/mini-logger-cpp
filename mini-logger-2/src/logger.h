@@ -150,6 +150,13 @@ using std::chrono::system_clock;
         }                                                                                                              \
     }
 
+// log without anyting.
+#define LLOG(x)                                                                                                        \
+    {                                                                                                                  \
+        LOGINFO(LOG_NONE, "", "")                                                                                      \
+        log.Log(info, y);                                                                                              \
+    }
+
 enum class LogLevel
 {
     NONE = 0,
@@ -375,6 +382,9 @@ class Logger
             else
                 out << GetFullHeader(info.level, true);
 
+            if(info.level == LogLevel::NONE)
+                out.clear();
+
             out << std::forward<Arg>(arg);
             using expander = int[];
             (void) expander{0, (void(out << std::forward<Args>(args)), 0)...};
@@ -387,7 +397,10 @@ class Logger
                 out << GetFullHeader(info.level, false, info.filename, info.linenumber);
             else
                 out << GetFullHeader(info.level, false);
-            
+
+            if(info.level == LogLevel::NONE)
+                out.clear();
+
             out << std::forward<Arg>(arg);
             using expander = int[];
             (void) expander{0, (void(out << std::forward<Args>(args)), 0)...};
@@ -408,6 +421,9 @@ class Logger
                 out << GetFullHeader(info.level, true, info.filename, info.linenumber);
             else
                 out << GetFullHeader(info.level, true);
+
+            if(info.level == LogLevel::NONE)
+                out.clear();
 
             out << std::forward<Arg>(arg);
             using expander = int[];
