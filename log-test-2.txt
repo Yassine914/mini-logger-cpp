@@ -7,3 +7,25 @@
 [INFO 2\main.cpp:22 11:43:28]	this will show up
 [DEBUG 2\main.cpp:23 11:43:28]	this will not show up
 [FATAL 2\main.cpp:24 11:43:28]	1this will not show up either
+[INFO 22:01:43]	DOOM ENGINE v0
+[INFO 22:01:43]	this will not work.
+[FATAL \main.cpp:15 22:01:43]	AAAAAAAAAAAAAAAAAAA|
+[DEBUG \main.cpp:16 22:01:43]	debug debug
+[WARN \main.cpp:18 22:01:43]	sup mo fo again
+[INFO 22:01:43]	info info info.
+[INFO \main.cpp:22 22:01:43]	this will show up
+[DEBUG \main.cpp:23 22:01:43]	this will not show up
+[FATAL \main.cpp:24 22:01:43]	1this will not show up either
+[ 22:01:43]	HELLO
+[31msup[0m
+[[35mINFO 22:04:43[0m]	DOOM ENGINE v0
+[[35mINFO 22:04:43[0m]	this will not work.
+[[31mFATAL \main.cpp:15 22:04:43[0m]	AAAAAAAAAAAAAAAAAAA|
+[[34mDEBUG \main.cpp:16 22:04:43[0m]	debug debug
+[[33mWARN \main.cpp:18 22:04:43[0m]	sup mo fo again
+[[35mINFO 22:04:43[0m]	info info info.
+[[35mINFO \main.cpp:22 22:04:43[0m]	this will show up
+[[34mDEBUG \main.cpp:23 22:04:43[0m]	this will not show up
+[[31mFATAL \main.cpp:24 22:04:43[0m]	1this will not show up either
+HELLO
+[31msup[0m

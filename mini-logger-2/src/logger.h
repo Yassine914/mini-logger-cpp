@@ -41,6 +41,7 @@ using std::chrono::system_clock;
 #define PURPLE_TEXT(x) TEXT_PURPLE, x, TEXT_WHITE
 #define CYAN_TEXT(x)   TEXT_CYAN, x, TEXT_WHITE
 
+#define LOG_NONE      0
 #define LOG_FATAL     1
 #define LOG_ERROR     2
 #define LOG_WARN      3
@@ -153,6 +154,7 @@ using std::chrono::system_clock;
 // log without anyting.
 #define LLOG(x...)                                                                                                     \
     {                                                                                                                  \
+        LOGINIT();                                                                                                     \
         LOGINFO(LOG_NONE, "", "")                                                                                      \
         log.Log(info, x);                                                                                              \
     }
@@ -377,13 +379,13 @@ class Logger
         case OutputType::NONE:
             return;
         case OutputType::CONSOLE:
-            if(info.filename != "")
-                out << GetFullHeader(info.level, true, info.filename, info.linenumber);
-            else
-                out << GetFullHeader(info.level, true);
-
-            if(info.level == LogLevel::NONE)
-                out.clear();
+            if(info.level != LogLevel::NONE)
+            {
+                if(info.filename != "")
+                    out << GetFullHeader(info.level, true, info.filename, info.linenumber);
+                else
+                    out << GetFullHeader(info.level, true);
+            }
 
             out << std::forward<Arg>(arg);
             using expander = int[];
@@ -393,13 +395,13 @@ class Logger
             break;
 
         case OutputType::FILE:
-            if(info.filename != "")
-                out << GetFullHeader(info.level, false, info.filename, info.linenumber);
-            else
-                out << GetFullHeader(info.level, false);
-
-            if(info.level == LogLevel::NONE)
-                out.clear();
+            if(info.level != LogLevel::NONE)
+            {
+                if(info.filename != "")
+                    out << GetFullHeader(info.level, true, info.filename, info.linenumber);
+                else
+                    out << GetFullHeader(info.level, true);
+            }
 
             out << std::forward<Arg>(arg);
             using expander = int[];
@@ -417,13 +419,13 @@ class Logger
 
         case OutputType::ALL:
             // console
-            if(info.filename != "")
-                out << GetFullHeader(info.level, true, info.filename, info.linenumber);
-            else
-                out << GetFullHeader(info.level, true);
-
-            if(info.level == LogLevel::NONE)
-                out.clear();
+            if(info.level != LogLevel::NONE)
+            {
+                if(info.filename != "")
+                    out << GetFullHeader(info.level, true, info.filename, info.linenumber);
+                else
+                    out << GetFullHeader(info.level, true);
+            }
 
             out << std::forward<Arg>(arg);
             using expander = int[];
@@ -435,10 +437,13 @@ class Logger
 
             // file
             std::stringstream out; 
-            if(info.filename != "")
-                out << GetFullHeader(info.level, false, info.filename, info.linenumber);
-            else
-                out << GetFullHeader(info.level, false);
+            if(info.level != LogLevel::NONE)
+            {
+                if(info.filename != "")
+                    out << GetFullHeader(info.level, true, info.filename, info.linenumber);
+                else
+                    out << GetFullHeader(info.level, true);
+            }
 
             out << std::forward<Arg>(arg);
             using expander = int[];

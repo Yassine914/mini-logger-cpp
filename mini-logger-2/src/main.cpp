@@ -22,4 +22,6 @@ int main()
     LINFO(true, "this will show up\n");
     LDEBUG(true, "this will not show up\n");
     LERROR(true, "this will not show up either\n");
+
+    LLOG("HELLO\n", RED_TEXT("sup"), "\n");
 }
