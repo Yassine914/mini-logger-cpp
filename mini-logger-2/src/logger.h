@@ -34,6 +34,13 @@ using std::chrono::system_clock;
     #define TEXT_WHITE  "\x1b[0m"
 #endif
 
+#define RED_TEXT(x)    TEXT_RED, x, TEXT_WHITE
+#define GREEN_TEXT(x)  TEXT_GREEN, x, TEXT_WHITE
+#define YELLOW_TEXT(x) TEXT_YELLOW, x, TEXT_WHITE
+#define BLUE_TEXT(x)   TEXT_BLUE, x, TEXT_WHITE
+#define PURPLE_TEXT(x) TEXT_PURPLE, x, TEXT_WHITE
+#define CYAN_TEXT(x)   TEXT_CYAN, x, TEXT_WHITE
+
 #define LOG_FATAL     1
 #define LOG_ERROR     2
 #define LOG_WARN      3
