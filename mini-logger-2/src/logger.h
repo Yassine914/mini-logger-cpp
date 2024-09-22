@@ -151,10 +151,10 @@ using std::chrono::system_clock;
     }
 
 // log without anyting.
-#define LLOG(x)                                                                                                        \
+#define LLOG(x...)                                                                                                     \
     {                                                                                                                  \
         LOGINFO(LOG_NONE, "", "")                                                                                      \
-        log.Log(info, y);                                                                                              \
+        log.Log(info, x);                                                                                              \
     }
 
 enum class LogLevel
